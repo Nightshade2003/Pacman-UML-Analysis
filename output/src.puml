@@ -1,0 +1,225 @@
+
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+' =========================
+' CONSTANTS
+' =========================
+class Constante {
+  +{static} BLOCK_SIZE : int
+  +{static} DIMENSION : Dimension
+  +{static} UNIT : int
+  +{static} JAIL_TIME_UNIT : int
+  +{static} STD_VELOCITY : int
+  +{static} SLOW_VELOCITY : int
+  +{static} GHOSTSCOLORS : Color[]
+  +{static} GOMESCOLORS : Color[]
+  +{static} SCALES : double[]
+  +{static} STATIC_WRAPAROUND : Point[]
+  +{static} DYNAMIC_WRAPAROUND : Point[]
+  +{static} PAC_START : Point
+  +{static} GHOSTS_START : Point[]
+  +{static} NUMBER_OF_GHOST : int
+  +{static} PAC_START_LIFE : int
+
+  +{static} buildGomeMap(index:int) : int[][]
+  +{static} addSpecialGomes(index:int,map:int[][]) : void
+}
+
+class ArrowListener
+
+class Block {
+  #point : Point
+  #color : Color
+  #SIZE : int
+
+  +Block()
+  +Block(p:Point,c:Color)
+  +getPoint() : Point
+  +getColor() : Color
+  +getSize() : int
+  +setColor(c:Color) : void
+}
+
+class Drawer {
+  -s : int
+  -pacmanPoint : Point
+  -ghostPoint : Point[]
+  -pacColor : Color
+  -pacmanDirection : Direction
+  -blocks : int
+  -gomes : int
+
+  +Drawer(b:int[][],g:int[][])
+  +paintComponent(g:Graphics) : void
+  +drawPacman(g:Graphics) : void
+  +drawPacghost(g:Graphics,i:int) : void
+  +drawMap(g:Graphics,size:int) : void
+  +updateMaps(b:int[][],g:int[][]) : void
+  +getBlockSize() : int
+  +setPacmanFeatures(pac:PacMan) : void
+  +setPacghostPoint(i:int,p:Point,c:Color) : void
+}
+
+class Maze {
+  -frame : JFrame
+  -label : JLabel
+  -dimension : Dimension
+  -drawer : Drawer
+
+  +Maze(b:int[][],g:int[][],listener:KeyListener,pac:PacMan,ghosts:PacGhost[])
+  +setPacmanFeatures(pac:PacMan) : void
+  +show(pac:PacMan,sc:int,life:int) : void
+  +close() : void
+  +updateMaps(b:int[][],g:int[][]) : void
+  +setGhostsPoint(ghosts:PacGhost[]) : void
+  +sleep(ms:int) : void
+}
+
+class Shapes {
+  -line : Lines
+  -nbMin : int
+  -nbMax : int
+  -xplus : int
+  -yplus : int
+  -inBetween : int
+  -dilation : int
+  -normalDilation : boolean
+}
+
+class Mapper {
+  +letter : String
+  +shapes : List<Shapes>
+  ~add : int
+
+  +Mapper(l:String,s:List<Shapes>,a:int)
+  +getShapes() : List<Shapes>
+  +getLetter() : String
+  +getAdd() : int
+}
+
+class Transformers {
+  -mapping : List<Mapper>
+  -v1 : List<Mapper>
+  -v2 : List<Mapper>
+  -version : int
+
+  +Transformers()
+  +switchVersion() : void
+  +getMapping() : List<Mapper>
+  +getVersion() : List<Mapper>
+}
+
+class Structure {
+  -START : Point
+  -VSTART : Point
+  -design : List<String>
+  -transformer : Transformers
+  ~customMap : List<Mapper>
+
+  +Structure()
+  +Structure(d:List<String>)
+  +updateDesign(d:List<String>) : void
+}
+
+class App {
+  +{static} main(args:String[]) : void
+}
+
+class PacmanGame {
+  ~score : int
+  ~mapIndex : int
+  -pacman : PacMan
+  -ghosts : PacGhost[]
+  -blocksMatrix : int[][]
+  -gomesMatrix : int[][]
+  ~maze : Maze
+  +listener : KeyListener
+
+  +PacmanGame()
+  +play() : void
+  +ask2Play(msg:String) : void
+  +congrats(msg:String) : void
+  +totalReset() : void
+  +partialReset() : void
+  +noMoreGomes() : boolean
+  +noMoreLife() : boolean
+  +updateAll() : void
+  +moveGhosts() : void
+  +manageGhosts() : void
+  +sleep(ms:int) : void
+  +quit() : void
+}
+
+abstract class AbstractCharacter {
+  #point : Point
+  #movement : Movement
+  #state : State
+  #velocity : int
+  #START : Point
+  #color : Color
+  #baseColor : Color
+
+  +move(index:int) : void
+  +manage() : void
+  +getPoint() : Point
+  +getMovement() : Movement
+  +getState() : State
+}
+
+class Movement {
+  -current : Direction
+  -next : Direction
+
+  +Movement()
+  +getCurrent() : Direction
+  +getNext() : Direction
+  +setCurrent(c:Direction) : void
+  +setNext(n:Direction) : void
+}
+
+class PacGhost {
+  ~jailTime : int
+  +PacGhost(p:Point,bc:Color)
+  +manage() : void
+  +move(index:int) : void
+}
+
+class PacMan {
+  -life : int
+  ~bonus : boolean
+
+  +PacMan()
+  +move(index:int) : void
+  +manage() : void
+  +addLife() : void
+  +loseLife() : void
+  +getLife() : int
+}
+
+class Utils {
+  +{static} clone2DMatrix(mat:int[][]) : int[][]
+  +{static} clonePoint(p:Point) : Point
+  +{static} cloneDimension(d:Dimension,w:int,h:int) : Dimension
+}
+
+' =========================
+' RELATIONSHIPS
+' =========================
+Drawer ..> PacMan
+Maze *-- Drawer
+Maze ..> PacMan
+Maze ..> PacGhost
+Structure *-- Transformers
+Structure o-- Mapper
+Transformers o-- Mapper
+Mapper o-- Shapes
+PacmanGame *-- PacMan
+PacmanGame *-- PacGhost
+PacmanGame --> Maze
+AbstractCharacter --> Movement
+PacGhost --|> AbstractCharacter
+PacMan --|> AbstractCharacter
+
+@enduml
